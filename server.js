@@ -29,23 +29,40 @@ const REQUIRED_ENV = [
 ]
 
 // 이름을 잘못 지은 환경변수를 찾아준다.
-// 단어 구성이 같으면(SECRET_SESSION ↔ SESSION_SECRET) 오타로 본다.
-const wordKey = (name) =>
-  name
-    .toUpperCase()
-    .split(/[^A-Z0-9]+/)
-    .filter(Boolean)
-    .sort()
-    .join('_')
+// 구분자·순서를 무시하고 글자 구성이 같으면(SECRET_SESSION, SESSIONSECRET) 오타로 본다.
+const letterKey = (name) =>
+  [...name.toUpperCase().replace(/[^A-Z0-9]/g, '')].sort().join('')
 
 function misnamedEnv(missing) {
   const found = {}
   for (const want of missing) {
-    const target = wordKey(want)
-    const hit = Object.keys(process.env).find((name) => name !== want && wordKey(name) === target)
+    const target = letterKey(want)
+    const hit = Object.keys(process.env).find((name) => name !== want && letterKey(name) === target)
     if (hit) found[want] = hit
   }
   return found
+}
+
+// 오타 감지가 못 잡는 경우를 위해, 관련 있어 보이는 이름을 그대로 보여준다.
+// Vercel 이 기본으로 주는 변수는 걸러 낸다.
+function relatedEnvNames(missing) {
+  const words = new Set(missing.flatMap((name) => name.split('_')))
+  return Object.keys(process.env)
+    .filter((name) => !/^(VERCEL|AWS|NODE|NPM|PATH|LANG|HOME|PWD)/.test(name))
+    .filter((name) => [...words].some((w) => name.toUpperCase().includes(w)))
+    .sort()
+}
+
+function envHint(missing, misnamed) {
+  if (!missing.length) return '설정 정상'
+  if (Object.keys(misnamed).length) {
+    const fixes = Object.entries(misnamed).map(([want, got]) => `${got} → ${want}`)
+    return `이름이 잘못됐습니다: ${fixes.join(', ')}`
+  }
+  // 이름은 맞는데 값이 비어 있는 경우
+  const blank = missing.filter((name) => name in process.env)
+  if (blank.length) return `${blank.join(', ')} 의 값이 비어 있습니다.`
+  return `${missing.join(', ')} 가 없습니다. 추가한 뒤 반드시 Redeploy 해야 반영됩니다.`
 }
 
 // 설정이 제대로 들어갔는지 확인하는 용도. 값 자체는 노출하지 않는다.
@@ -59,13 +76,9 @@ app.get('/api/health', (req, res) => {
     // 빠진 환경변수와, 비슷한 이름으로 잘못 들어간 것
     missingEnv: missing,
     misnamedEnv: misnamed,
-    hint: missing.length
-      ? Object.keys(misnamed).length
-        ? `이름이 잘못됐습니다: ${Object.entries(misnamed)
-            .map(([want, got]) => `${got} → ${want}`)
-            .join(', ')}`
-        : '환경변수를 추가한 뒤 반드시 Redeploy 해야 반영됩니다.'
-      : '설정 정상',
+    // 서버가 실제로 보고 있는, 관련 있어 보이는 이름들 (값은 안 보여준다)
+    relatedEnvNames: missing.length ? relatedEnvNames(missing) : undefined,
+    hint: envHint(missing, misnamed),
 
     hasPlacesKey: Boolean(process.env.GOOGLE_API_KEY),
     hasMapsKey: Boolean(process.env.GOOGLE_MAPS_BROWSER_KEY),
