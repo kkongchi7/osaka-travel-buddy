@@ -18,6 +18,7 @@ import { createMapView } from './map.js'
 import { openProfileSheet } from './profile.js'
 import { openTrashSheet } from './trash.js'
 import { api, avatar, h, toast } from './ui.js'
+import { loadWeather, renderWeather } from './weather.js'
 
 const root = document.getElementById('root')
 
@@ -245,6 +246,7 @@ function render({ keepFocus = false } = {}) {
       state.user = user
       await loadPlaces()
       render()
+      showWeatherWhenReady()
     })
     return
   }
@@ -281,7 +283,8 @@ function render({ keepFocus = false } = {}) {
       )
   )
 
-  const main = h('main', {}, header)
+  // 날씨는 목록보다 위에 온다. 아직 못 불러왔으면 h() 가 걸러 낸다.
+  const main = h('main', {}, renderWeather(), header)
 
   if (state.places.length) {
     main.append(renderSearch({ filters: state.filters, onChange: render }))
@@ -347,6 +350,14 @@ window.addEventListener('otb:session-expired', (e) => {
   toast(e.detail || '로그인이 풀렸어요. 다시 로그인해 주세요.')
 })
 
+// 날씨는 남의 서버를 거치므로 첫 화면을 붙잡지 않는다. 도착하면 그때 다시 그린다.
+function showWeatherWhenReady() {
+  loadWeather().then((forecast) => {
+    if (forecast && state.user) render({ keepFocus: true })
+  })
+}
+
 await loadSession()
 if (state.user) await loadPlaces()
 render()
+if (state.user) showWeatherWhenReady()

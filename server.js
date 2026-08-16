@@ -10,6 +10,7 @@ import adminRoutes from './src/routes/admin.js'
 import authRoutes from './src/routes/auth.js'
 import photoRoutes from './src/routes/photo.js'
 import placeRoutes from './src/routes/places.js'
+import weatherRoutes from './src/routes/weather.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -111,6 +112,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/places', placeRoutes)
 app.use('/api/photo', photoRoutes)
+app.use('/api/weather', weatherRoutes)
 
 app.use(express.static(path.join(__dirname, 'public')))
 

@@ -29,6 +29,7 @@
 | **일본 밖 차단** | 주소의 국가 코드가 일본이 아니면 등록을 거부한다 |
 | **목록 · 검색 · 정렬** | 이름 부분 일치 검색, 등록순 / 평점순 / 좋아요순 / 이름순 × 오름·내림차순 |
 | **지도** | 마커 색은 올린 사람, 확정은 테두리, 다녀옴은 반투명. 마커를 누르면 정보창에서 바로 편집 |
+| **날씨** | 목록 맨 위에 오사카 1주일 예보를 한 줄로. 날짜와 아이콘만 보이고, **자세히 보기**를 누르면 기온·강수확률·강수량까지 한 번에 본다. 출처는 tenki.jp |
 | **권한** | 이름·카테고리·지역·메모·확정·다녀옴은 누구나 수정(이력 기록). **고정**은 관리자만이며 걸면 전부 잠긴다. 좋아요는 잠겨도 허용 |
 | **관리자 패널** | 멤버 관리(색상·권한·정지·삭제·PIN 재설정), 카테고리·지역 추가/삭제/이름 변경 |
 
@@ -93,15 +94,16 @@ src/
   resolve.js         구글 지도 링크 → place_id
   places.js          Places API 호출
   savedList.js       저장 목록 스크래핑 (playwright-core)
+  weather.js         tenki.jp 오사카 예보 파싱 + 1시간 캐시
   placeModel.js      레코드 형식 · 일본 여부 검사 · 직렬화
   meta.js            카테고리 · 지역 판정
   auth.js            PIN 해시(scrypt) · 서명 쿠키 · 권한 미들웨어
-  routes/            auth · places · admin · photo
+  routes/            auth · places · admin · photo · weather
 
 public/              번들러 없는 vanilla ES modules
   ui.js              h() · mount() · api() · 시트 · 토스트
   app.js             상태와 렌더 진입점
-  list.js filters.js map.js add.js admin.js trash.js profile.js
+  list.js filters.js map.js add.js admin.js trash.js profile.js weather.js
 ```
 
 기술 선택은 단순하다. **Node ESM + Express 5, 빌드 단계 없음, 프레임워크 없음.**
