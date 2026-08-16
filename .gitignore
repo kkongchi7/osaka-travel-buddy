@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+
+# 실제 운영 데이터는 커밋하지 않는다 (배포에서는 볼륨에 저장된다).
+# seed/db.json 은 첫 부팅용이라 반드시 커밋되어야 한다.
+data/
+
+# 임시 검증 스크립트
+.test-*.mjs
+.e2e-*.mjs
+.audit-*.mjs
+.probe*.mjs
