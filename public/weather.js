@@ -87,6 +87,17 @@ export function renderWeather() {
   return h(
     'section',
     { class: 'weather' },
+    h(
+      'a',
+      {
+        class: 'weather-source',
+        href: forecast.source,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        title: `출처: tenki.jp · ${forecast.place}`,
+      },
+      'tenki.jp'
+    ),
     h('div', { class: 'weather-days' }, ...days),
     h(
       'button',
