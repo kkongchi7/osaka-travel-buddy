@@ -21,11 +21,24 @@ app.use(express.json({ limit: '1mb' }))
 app.use(withData)
 app.use(attachUser)
 
+// 설정이 제대로 들어갔는지 확인하는 용도. 값 자체는 노출하지 않는다.
 app.get('/api/health', (req, res) => {
+  const users = db().users
   res.json({
     ok: true,
     hasPlacesKey: Boolean(process.env.GOOGLE_API_KEY),
+    hasMapsKey: Boolean(process.env.GOOGLE_MAPS_BROWSER_KEY),
     hasClaudeKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    hasSessionSecret: Boolean(process.env.SESSION_SECRET),
+    // 관리자 승격이 안 될 때 원인을 좁히기 위한 정보
+    hasAdminNickname: Boolean(process.env.ADMIN_NICKNAME?.trim()),
+    adminNicknameMatchesAUser: Boolean(
+      process.env.ADMIN_NICKNAME &&
+        users.some((u) => u.nickname === process.env.ADMIN_NICKNAME.normalize('NFC').trim())
+    ),
+    userCount: users.length,
+    adminCount: users.filter((u) => u.role === 'admin').length,
+    storage: process.env.KV_REST_API_URL ? 'redis' : 'file',
   })
 })
 

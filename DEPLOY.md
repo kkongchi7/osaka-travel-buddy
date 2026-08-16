@@ -97,7 +97,21 @@ https://<프로젝트>.vercel.app/*
 
 ```bash
 curl https://<도메인>/api/health
-# {"ok":true,"hasPlacesKey":true,"hasClaudeKey":false}
+```
+
+환경변수가 제대로 들어갔는지 여기서 전부 확인할 수 있다(값은 노출되지 않는다).
+
+```json
+{
+  "hasPlacesKey": true,          // 서버용 구글 키
+  "hasMapsKey": true,            // 브라우저용 구글 키 — false 면 지도가 안 뜬다
+  "hasSessionSecret": true,      // false 면 배포할 때마다 전원 로그아웃
+  "hasAdminNickname": true,      // false 면 ADMIN_NICKNAME 미설정 (또는 재배포 안 함)
+  "adminNicknameMatchesAUser": true,
+  "userCount": 1,
+  "adminCount": 1,               // 0 이면 관리자가 없는 상태
+  "storage": "redis"             // "file" 이면 Redis 가 안 붙은 것 — 데이터가 날아간다
+}
 ```
 
 - [ ] `이재혁` / `0710` 로그인
@@ -115,7 +129,12 @@ curl https://<도메인>/api/health
 첫 요청만 구글 API 를 호출하고 이후 30일간 CDN 이 응답한다.
 
 **동시 편집** — 좋아요는 Redis SET 원자 연산이라 동시에 눌러도 안전하다.
-장소·유저 같은 다른 컬렉션은 바뀐 것만 골라 쓰므로 서로 덮어쓰지 않는다.
+다만 **같은 컬렉션**(예: 두 사람이 동시에 장소 등록)은 배열을 통째로 덮어쓰기 때문에
+나중에 저장한 쪽이 앞의 것을 지운다. 컬렉션을 HASH 로 쪼개면 해결된다.
+
+**관리자 권한이 안 붙을 때** — `ADMIN_NICKNAME` 과 닉네임이 정확히 같아야 한다.
+환경변수를 나중에 추가했다면 **재배포해야 반영된다.** 재배포하면 부팅 시 `syncAdmin()` 이
+이미 가입한 계정을 관리자로 승격시킨다. `/api/health` 의 `hasAdminNickname` 으로 확인.
 
 ## 데이터 백업
 
