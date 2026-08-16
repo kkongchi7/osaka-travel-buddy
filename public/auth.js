@@ -9,6 +9,8 @@ export function renderAuth(root, onSignedIn) {
       <div class="auth-screen">
         <div class="auth-card">
           <header>
+            <img class="auth-logo" src="/logo.webp" alt=""
+                 onerror="if(this.dataset.fallback){this.remove()}else{this.dataset.fallback=1;this.src='/logo.png'}" />
             <h1>오사카 여행 도우미</h1>
             <p>${isLogin ? '닉네임과 PIN을 입력해주세요' : '프로필을 만들어주세요'}</p>
           </header>

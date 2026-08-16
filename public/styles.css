@@ -295,6 +295,17 @@ img {
   text-align: center;
 }
 
+/* 로고 — 원형 배지라 둥글게 자른다. 파일이 없으면 JS 가 요소를 지운다. */
+.auth-logo {
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 18px;
+  display: block;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+}
+
 .auth-card h1 {
   font-size: 26px;
   margin-bottom: 6px;
@@ -347,6 +358,14 @@ img {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.nav-logo {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .nav-title {
@@ -1571,9 +1590,18 @@ main {
     padding: 0 14px;
     height: 56px;
   }
+  .nav-logo {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+  }
   .nav-title {
     font-size: 16px;
     min-width: 0;
+  }
+  .auth-logo {
+    width: 88px;
+    height: 88px;
   }
   .nav .btn-sm {
     padding: 8px 14px;

@@ -1,0 +1,17 @@
+{
+  "name": "오사카 여행 도우미",
+  "short_name": "오사카",
+  "description": "지인들과 오사카 여행 장소를 모아보는 곳",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

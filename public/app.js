@@ -146,6 +146,20 @@ function navBar() {
   return h(
     'div',
     { class: 'nav' },
+    // WebP 를 못 읽는 브라우저면 PNG 로, 파일 자체가 없으면 요소를 지워 레이아웃을 지킨다
+    h('img', {
+      class: 'nav-logo',
+      src: '/logo.webp',
+      alt: '',
+      onError: (event) => {
+        const img = event.target
+        if (img.dataset.fallback) img.remove()
+        else {
+          img.dataset.fallback = '1'
+          img.src = '/logo.png'
+        }
+      },
+    }),
     h('span', { class: 'nav-title' }, '오사카 여행 도우미'),
     h('div', { class: 'nav-spacer' }),
     h('button', { class: 'btn btn-sm nav-add', onClick: openAdd }, '＋ 장소 추가'),
