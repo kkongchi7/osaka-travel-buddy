@@ -38,6 +38,10 @@ export async function api(path, { method = 'GET', body } = {}) {
     const error = new Error(data?.message || data?.error || `요청에 실패했어요 (${res.status})`)
     error.status = res.status
     error.data = data
+    // 세션이 끊긴 상태로 계속 두면 뭘 눌러도 실패한다. 앱이 로그인 화면으로 되돌리게 알린다.
+    if (res.status === 401 && !path.startsWith('/api/auth/')) {
+      window.dispatchEvent(new CustomEvent('otb:session-expired', { detail: error.message }))
+    }
     throw error
   }
   return data

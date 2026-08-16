@@ -17,7 +17,7 @@ import { highlightPlace, openPlaceSheet, renderList } from './list.js'
 import { createMapView } from './map.js'
 import { openProfileSheet } from './profile.js'
 import { openTrashSheet } from './trash.js'
-import { api, avatar, h } from './ui.js'
+import { api, avatar, h, toast } from './ui.js'
 
 const root = document.getElementById('root')
 
@@ -335,6 +335,17 @@ function render({ keepFocus = false } = {}) {
   root.replaceChildren(navBar(), main)
   restoreFocus()
 }
+
+// 세션이 끊기면 로그인 화면으로 되돌린다. 안 그러면 뭘 눌러도 오류만 난다.
+let sessionExpired = false
+window.addEventListener('otb:session-expired', (e) => {
+  if (sessionExpired || !state.user) return
+  sessionExpired = true
+  state.user = null
+  state.places = []
+  render()
+  toast(e.detail || '로그인이 풀렸어요. 다시 로그인해 주세요.')
+})
 
 await loadSession()
 if (state.user) await loadPlaces()

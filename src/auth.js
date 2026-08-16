@@ -103,14 +103,30 @@ export function attachUser(req, res, next) {
   next()
 }
 
+// SESSION_SECRET 이 없으면 인스턴스마다 다른 임시 키를 쓰게 되어,
+// 로그인한 뒤 다음 요청이 다른 인스턴스로 가면 쿠키 검증이 실패한다.
+// 그냥 '로그인이 필요합니다' 라고만 하면 원인을 찾을 수 없으므로 구분해서 알린다.
+const UNSTABLE_SECRET = !process.env.SESSION_SECRET && process.env.NODE_ENV === 'production'
+
+function unauthorized(res) {
+  return res.status(401).json({
+    error: 'unauthorized',
+    message: UNSTABLE_SECRET
+      ? '로그인이 유지되지 않습니다. 서버에 SESSION_SECRET 이 설정돼 있지 않아요.'
+      : '로그인이 필요합니다. 다시 로그인해 주세요.',
+  })
+}
+
 export function requireAuth(req, res, next) {
-  if (!req.user) return res.status(401).json({ error: 'unauthorized' })
+  if (!req.user) return unauthorized(res)
   next()
 }
 
 export function requireAdmin(req, res, next) {
-  if (!req.user) return res.status(401).json({ error: 'unauthorized' })
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' })
+  if (!req.user) return unauthorized(res)
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'forbidden', message: '관리자만 할 수 있어요.' })
+  }
   next()
 }
 
