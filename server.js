@@ -21,11 +21,52 @@ app.use(express.json({ limit: '1mb' }))
 app.use(withData)
 app.use(attachUser)
 
+const REQUIRED_ENV = [
+  'SESSION_SECRET',
+  'ADMIN_NICKNAME',
+  'GOOGLE_API_KEY',
+  'GOOGLE_MAPS_BROWSER_KEY',
+]
+
+// 이름을 잘못 지은 환경변수를 찾아준다.
+// 단어 구성이 같으면(SECRET_SESSION ↔ SESSION_SECRET) 오타로 본다.
+const wordKey = (name) =>
+  name
+    .toUpperCase()
+    .split(/[^A-Z0-9]+/)
+    .filter(Boolean)
+    .sort()
+    .join('_')
+
+function misnamedEnv(missing) {
+  const found = {}
+  for (const want of missing) {
+    const target = wordKey(want)
+    const hit = Object.keys(process.env).find((name) => name !== want && wordKey(name) === target)
+    if (hit) found[want] = hit
+  }
+  return found
+}
+
 // 설정이 제대로 들어갔는지 확인하는 용도. 값 자체는 노출하지 않는다.
 app.get('/api/health', (req, res) => {
   const users = db().users
+  const missing = REQUIRED_ENV.filter((name) => !process.env[name]?.trim())
+  const misnamed = misnamedEnv(missing)
+
   res.json({
-    ok: true,
+    ok: missing.length === 0,
+    // 빠진 환경변수와, 비슷한 이름으로 잘못 들어간 것
+    missingEnv: missing,
+    misnamedEnv: misnamed,
+    hint: missing.length
+      ? Object.keys(misnamed).length
+        ? `이름이 잘못됐습니다: ${Object.entries(misnamed)
+            .map(([want, got]) => `${got} → ${want}`)
+            .join(', ')}`
+        : '환경변수를 추가한 뒤 반드시 Redeploy 해야 반영됩니다.'
+      : '설정 정상',
+
     hasPlacesKey: Boolean(process.env.GOOGLE_API_KEY),
     hasMapsKey: Boolean(process.env.GOOGLE_MAPS_BROWSER_KEY),
     hasClaudeKey: Boolean(process.env.ANTHROPIC_API_KEY),
@@ -39,6 +80,8 @@ app.get('/api/health', (req, res) => {
     userCount: users.length,
     adminCount: users.filter((u) => u.role === 'admin').length,
     storage: process.env.KV_REST_API_URL ? 'redis' : 'file',
+    // 어느 배포를 보고 있는지 (Production 이 아니면 환경변수가 다를 수 있다)
+    vercelEnv: process.env.VERCEL_ENV ?? null,
   })
 })
 
