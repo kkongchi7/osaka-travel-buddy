@@ -9,7 +9,6 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.117.1",
     "@sparticuz/chromium": "^149.0.0",
     "@upstash/redis": "^1.38.2",
     "dotenv": "^17.4.2",

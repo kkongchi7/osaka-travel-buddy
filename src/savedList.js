@@ -61,13 +61,6 @@ async function getBrowser() {
   return browserPromise
 }
 
-export async function closeBrowser() {
-  if (!browserPromise) return
-  const browser = await browserPromise.catch(() => null)
-  browserPromise = null
-  await browser?.close().catch(() => {})
-}
-
 /** 저장 목록 페이지에서 { title, items: [{ name, rating, typeLabel }] } 추출 */
 export async function scrapeSavedList(url, { maxScrolls = 40 } = {}) {
   let browser

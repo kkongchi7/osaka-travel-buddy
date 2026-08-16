@@ -82,7 +82,6 @@ app.get('/api/health', (req, res) => {
 
     hasPlacesKey: Boolean(process.env.GOOGLE_API_KEY),
     hasMapsKey: Boolean(process.env.GOOGLE_MAPS_BROWSER_KEY),
-    hasClaudeKey: Boolean(process.env.ANTHROPIC_API_KEY),
     hasSessionSecret: Boolean(process.env.SESSION_SECRET),
     // 관리자 승격이 안 될 때 원인을 좁히기 위한 정보
     hasAdminNickname: Boolean(process.env.ADMIN_NICKNAME?.trim()),
